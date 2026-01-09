@@ -11,7 +11,7 @@ class RebasRevengeApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Reba's Revenge",
+      title: "Reba's Revenge: Retriever Ridge Racing",
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.purple,

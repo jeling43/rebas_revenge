@@ -15,80 +15,92 @@ class Enemy extends PositionComponent with CollisionCallbacks {
   double moveSpeed = 50;
   final double moveRange = 100;
   late double startX;
+  double aiAngle = 0; // For racing AI
+  double animationTime = 0; // For consistent animation timing
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     add(RectangleHitbox());
     startX = position.x;
+    // Initialize AI angle based on starting position
+    aiAngle = math.Random().nextDouble() * 2 * math.pi;
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     
-    // Move back and forth
-    position.x += direction * moveSpeed * dt;
+    // Update animation time
+    animationTime += dt;
     
-    // Change direction at boundaries
-    if (position.x > startX + moveRange || position.x < startX - moveRange) {
-      direction *= -1;
-    }
+    // Racing opponents don't need local movement
+    // Movement is handled by game_world AI
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
     
-    // Draw evil magical squirrel
-    final bodyPaint = Paint()
+    // Draw squirrel racer in a kart (top-down view)
+    final kartPaint = Paint()
       ..color = Colors.red.shade900
       ..style = PaintingStyle.fill;
     
-    // Body
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: Offset(0, 0),
-        width: size.x * 0.7,
-        height: size.y * 0.8,
+    // Kart body
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset.zero,
+          width: size.x * 0.9,
+          height: size.y * 0.9,
+        ),
+        const Radius.circular(8),
       ),
-      bodyPaint,
+      kartPaint,
     );
     
-    // Head
-    canvas.drawCircle(Offset(0, -size.y / 3), size.x / 3, bodyPaint);
+    // Driver head (squirrel)
+    final headPaint = Paint()
+      ..color = Colors.red.shade700
+      ..style = PaintingStyle.fill;
+    
+    canvas.drawCircle(Offset(0, 0), size.x / 3, headPaint);
     
     // Evil eyes (glowing red)
     final eyePaint = Paint()
       ..color = Colors.red.shade300
       ..style = PaintingStyle.fill;
     
-    canvas.drawCircle(Offset(-size.x / 6, -size.y / 3), 4, eyePaint);
-    canvas.drawCircle(Offset(size.x / 6, -size.y / 3), 4, eyePaint);
+    canvas.drawCircle(Offset(-size.x / 8, -3), 3, eyePaint);
+    canvas.drawCircle(Offset(size.x / 8, -3), 3, eyePaint);
     
-    // Evil glow effect
-    final glowPaint = Paint()
-      ..color = Colors.red.withOpacity(0.3)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
+    // Racing number
+    final textPainter = TextPainter(
+      text: const TextSpan(
+        text: '13',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    );
     
-    canvas.drawCircle(Offset(0, 0), size.x / 2, glowPaint);
-    
-    // Bushy tail
-    final tailPaint = Paint()
-      ..color = Colors.red.shade800
-      ..style = PaintingStyle.fill;
-    
-    canvas.drawCircle(Offset(size.x / 2.5, size.y / 4), 12, tailPaint);
+    textPainter.layout();
+    textPainter.paint(
+      canvas,
+      Offset(-textPainter.width / 2, size.y / 4),
+    );
     
     // Evil sparkles
-    final time = DateTime.now().millisecondsSinceEpoch / 300;
     final sparklePaint = Paint()
       ..color = Colors.red.shade200.withOpacity(0.8)
       ..style = PaintingStyle.fill;
     
-    if ((time % 2).floor() == 0) {
-      canvas.drawCircle(Offset(size.x / 3, -size.y / 2), 2, sparklePaint);
-      canvas.drawCircle(Offset(-size.x / 3, -size.y / 2), 2, sparklePaint);
+    if ((animationTime * 3).floor() % 2 == 0) {
+      canvas.drawCircle(Offset(size.x / 4, -size.y / 3), 2, sparklePaint);
     }
   }
 }

@@ -47,13 +47,28 @@ class _GameScreenState extends State<GameScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildHUDItem(
-                        '🎾',
-                        'Tennis Balls: ${game.tennisballsCollected}/${game.tennisballsNeeded}',
+                        '🏁',
+                        'Lap: ${game.currentLap}/${game.totalLaps}',
                       ),
                       const SizedBox(height: 8),
                       _buildHUDItem(
-                        '🐕',
-                        'Friends Rescued: ${game.friendsRescued}/${game.friendsTotal}',
+                        '🏆',
+                        'Position: ${game.getPositionString()}',
+                      ),
+                      const SizedBox(height: 8),
+                      _buildHUDItem(
+                        '🎾',
+                        'Boosts: ${game.tennisballsCollected}',
+                      ),
+                      const SizedBox(height: 8),
+                      _buildHUDItem(
+                        '⚡',
+                        'Boost: ${game.boostMeter.toStringAsFixed(0)}%',
+                      ),
+                      const SizedBox(height: 8),
+                      _buildHUDItem(
+                        '⏱️',
+                        'Time: ${game.getRaceTimeString()}',
                       ),
                     ],
                   );
@@ -136,8 +151,11 @@ class _GameScreenState extends State<GameScreen> {
               ),
               const SizedBox(height: 20),
               const Text(
-                'The evil squirrel got you!',
-                style: TextStyle(fontSize: 20, color: Colors.white),
+                'You crashed or finished too far behind!',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 30),
               Row(
@@ -212,7 +230,7 @@ class _GameScreenState extends State<GameScreen> {
               ),
               const SizedBox(height: 20),
               const Text(
-                "You rescued Margo & Millie!",
+                "You won the race!",
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.white,
@@ -221,8 +239,19 @@ class _GameScreenState extends State<GameScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Tennis Balls Collected: ${game.tennisballsCollected}',
-                style: const TextStyle(fontSize: 18, color: Colors.white),
+                'Final Time: ${game.getRaceTimeString()}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                'Final Position: ${game.getPositionString()}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 30),
               Row(

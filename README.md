@@ -1,35 +1,37 @@
-# Reba's Revenge 🐕🎾
+# Reba's Revenge: Retriever Ridge Racing 🐕🎾🏁
 
-A magical world platformer game built with Flutter featuring Reba the golden retriever on a rescue mission!
+A Mario Kart-style racing game built with Flutter featuring Reba the golden retriever racing to save her friends!
 
 ## Game Overview
 
-**Reba's Revenge** is a side-scrolling platformer where you play as Reba, a brave golden retriever who must rescue her friends Margo and Millie from evil magical squirrels in a whimsical fantasy world.
+**Reba's Revenge: Retriever Ridge Racing** is a top-down racing game where you play as Reba, a brave golden retriever who must race against evil squirrel opponents at Retriever Ridge to save her friends Margo and Millie.
 
 ## Features
 
-- 🐕 **Play as Reba** - Control a golden retriever character with smooth movement and jumping mechanics
-- 🎾 **Collect Tennis Balls** - Gather magical glowing tennis balls throughout the level
-- 🐿️ **Avoid Evil Squirrels** - Dodge dangerous magical squirrels that patrol the platforms
-- 🏆 **Rescue Friends** - Find and free Margo and Millie trapped in cages
-- ✨ **Magical Theme** - Colorful, whimsical environment with sparkle effects
-- 🎮 **Multiple Game States** - Main menu, gameplay, game over, and victory screens
+- 🏎️ **Race as Reba** - Control Reba in her racing kart with smooth steering and speed mechanics
+- 🎾 **Collect Tennis Balls** - Gather tennis balls for speed boost power-ups
+- 🐿️ **Compete Against Squirrels** - Race against AI-controlled squirrel opponents
+- 🏁 **Complete 3 Laps** - Race around the Retriever Ridge track to victory
+- ⚡ **Speed Boost System** - Use collected tennis balls to activate speed boosts
+- 🏆 **Position Tracking** - See your current race position in real-time
+- ✨ **Colorful Theme** - Fun, whimsical racing environment
+- 🎮 **Multiple Game States** - Main menu, racing gameplay, game over, and victory screens
 
 ## How to Play
 
 ### Controls
-- **Arrow Keys** or **WASD** - Move left and right
-- **SPACE** or **UP Arrow** or **W** - Jump
+- **Arrow Keys** or **WASD** - Steer your kart (forward/back/left/right)
+- **SPACE** - Activate speed boost (uses boost meter)
 - **Mouse/Touch** - Navigate menus
 
 ### Objective
-1. Navigate through the magical platformer level
-2. Collect at least 5 magical tennis balls
-3. Rescue both Margo and Millie from their cages
-4. Avoid touching the evil red squirrels (instant game over!)
+1. Race around the Retriever Ridge track
+2. Collect tennis balls for speed boost power-ups
+3. Complete 3 laps around the track
+4. Finish in 1st place to win and save Margo & Millie!
 
 ### Victory Condition
-Successfully rescue both friends AND collect enough tennis balls to win!
+Successfully complete 3 laps and finish in 1st place to win the race!
 
 ## Getting Started
 
@@ -82,16 +84,16 @@ flutter build ios      # iOS
 lib/
 ├── main.dart                          # App entry point
 ├── screens/
-│   ├── menu_screen.dart              # Main menu UI
-│   └── game_screen.dart              # Game screen with HUD and overlays
+│   ├── menu_screen.dart              # Main menu UI with racing theme
+│   └── game_screen.dart              # Game screen with racing HUD and overlays
 └── game/
-    ├── game_world.dart               # Main game logic and world
+    ├── game_world.dart               # Main racing game logic and world
     └── components/
-        ├── player.dart               # Reba character component
-        ├── enemy.dart                # Evil squirrel enemies
-        ├── collectible.dart          # Tennis ball collectibles
-        ├── friend.dart               # Margo and Millie characters
-        └── platform.dart             # Platform components
+        ├── player.dart               # Reba's racing kart component
+        ├── enemy.dart                # Squirrel racer opponents with AI
+        ├── collectible.dart          # Tennis ball power-ups
+        ├── friend.dart               # Checkpoint markers (Margo & Millie)
+        └── platform.dart             # Track boundary components
 ```
 
 ## Technical Details
@@ -99,35 +101,43 @@ lib/
 - **Framework**: Flutter
 - **Game Engine**: Flame 1.19.0
 - **Platform Support**: Web, Windows, macOS, Linux, Android, iOS
-- **Architecture**: Component-based game architecture with collision detection
-- **Rendering**: Custom Canvas rendering with magical effects and animations
+- **Architecture**: Component-based racing game architecture with collision detection
+- **Rendering**: Custom Canvas rendering with top-down racing view
 
 ## Game Features Implementation
 
-### Physics
-- Gravity system for realistic jumping
-- Platform collision detection
-- Smooth horizontal movement
+### Racing Mechanics
+- Top-down racing view with camera following player
+- Forward/backward acceleration and deceleration
+- Steering and rotation system
+- Speed boost activation with boost meter
+
+### AI System
+- Opponent racers move around the track
+- Position tracking and race standings
+- Lap counter system
 
 ### Visual Effects
-- Sparkle and glow effects on magical elements
-- Animated floating collectibles
-- Color gradients for magical atmosphere
-- Character animations
-
-### Game States
-- **Playing**: Active gameplay with movement and collision
-- **Game Over**: Triggered when touching a squirrel
-- **Victory**: Achieved when all objectives are completed
+- Speed boost visual effects
+- Racing kart designs for player and opponents
+- Track boundaries and decorations
+- Real-time HUD with lap count, position, time, and boost meter
 
 ## Development
 
-This project uses Flutter and the Flame game engine for cross-platform game development. The game is designed with:
+This project uses Flutter and the Flame game engine for cross-platform racing game development. The game is designed with:
 
 - Clean component-based architecture
 - Separation of concerns (game logic, UI, components)
-- Reusable game components
+- Reusable racing components
+- Top-down racing camera system
 - Responsive design for multiple screen sizes
+
+## Game States
+
+- **Playing**: Active racing gameplay with steering, acceleration, and boost mechanics
+- **Game Over**: Triggered when finishing too far behind or crashing
+- **Victory**: Achieved by completing 3 laps in 1st place
 
 ## Credits
 
