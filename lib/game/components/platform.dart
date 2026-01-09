@@ -1,7 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
+import 'dart:math';
 
 class PlatformComponent extends PositionComponent with CollisionCallbacks {
   PlatformComponent({
