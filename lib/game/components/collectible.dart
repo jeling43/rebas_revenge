@@ -39,7 +39,7 @@ class Collectible extends PositionComponent with CollisionCallbacks {
     
     // Draw magical tennis ball
     final ballPaint = Paint()
-      ..color = Colors.greenYellow
+      ..color = Colors.lightGreenAccent.shade400
       ..style = PaintingStyle.fill;
     
     // Main ball
