@@ -210,9 +210,15 @@ class RebasRevengeGame extends FlameGame
     camera.viewfinder.position = Vector2.zero();
     
     // Remove and recreate all game objects
-    children.whereType<Enemy>().forEach((enemy) => enemy.removeFromParent());
-    children.whereType<Collectible>().forEach((collectible) => collectible.removeFromParent());
-    children.whereType<Friend>().forEach((friend) => friend.removeFromParent());
+    for (final enemy in children.whereType<Enemy>()) {
+      enemy.removeFromParent();
+    }
+    for (final collectible in children.whereType<Collectible>()) {
+      collectible.removeFromParent();
+    }
+    for (final friend in children.whereType<Friend>()) {
+      friend.removeFromParent();
+    }
     
     _createEnemies();
     _createCollectibles();

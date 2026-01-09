@@ -13,10 +13,14 @@ class PlatformComponent extends PositionComponent with CollisionCallbacks {
           anchor: Anchor.topLeft,
         );
 
+  // Cache random instance for sparkle positions
+  late final Random _random;
+
   @override
   Future<void> onLoad() async {
     await super.onLoad();
     add(RectangleHitbox());
+    _random = Random(position.x.toInt() + position.y.toInt());
   }
 
   @override
@@ -55,14 +59,13 @@ class PlatformComponent extends PositionComponent with CollisionCallbacks {
     );
     
     // Add some sparkle effects
-    final random = math.Random(position.x.toInt() + position.y.toInt());
     final sparklePaint = Paint()
       ..color = Colors.yellow.withOpacity(0.7)
       ..style = PaintingStyle.fill;
     
     for (int i = 0; i < 3; i++) {
-      final x = random.nextDouble() * size.x;
-      final y = random.nextDouble() * size.y;
+      final x = _random.nextDouble() * size.x;
+      final y = _random.nextDouble() * size.y;
       final phase = (DateTime.now().millisecondsSinceEpoch / 1000 + i) % 2;
       if (phase < 1) {
         canvas.drawCircle(Offset(x, y), 2, sparklePaint);

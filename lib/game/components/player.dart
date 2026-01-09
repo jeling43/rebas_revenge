@@ -19,6 +19,7 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
   Vector2 velocity = Vector2.zero();
   double horizontalMovement = 0;
   bool isOnGround = false;
+  double animationTime = 0;
   
   final double moveSpeed = 200;
   final double jumpSpeed = -500;
@@ -34,6 +35,9 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
   @override
   void update(double dt) {
     super.update(dt);
+    
+    // Update animation time
+    animationTime += dt;
     
     // Apply gravity
     velocity.y += gravity * dt;
@@ -103,8 +107,8 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
     
     canvas.drawCircle(Offset(size.x / 2, 0), 8, tailPaint);
     
-    // Sparkle effect (magical)
-    if ((DateTime.now().millisecondsSinceEpoch / 500).floor() % 2 == 0) {
+    // Sparkle effect (magical) - use game time instead of DateTime.now()
+    if ((animationTime * 2).floor() % 2 == 0) {
       final sparklePaint = Paint()
         ..color = Colors.yellow.withOpacity(0.6)
         ..style = PaintingStyle.fill;
