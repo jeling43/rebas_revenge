@@ -11,7 +11,7 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> {
   late final RebasRevengeGame game;
-  
+
   @override
   void initState() {
     super.initState();
@@ -25,7 +25,7 @@ class _GameScreenState extends State<GameScreen> {
         children: [
           // Game widget
           GameWidget(game: game),
-          
+
           // HUD overlay
           Positioned(
             top: 20,
@@ -37,8 +37,11 @@ class _GameScreenState extends State<GameScreen> {
                 borderRadius: BorderRadius.circular(15),
                 border: Border.all(color: Colors.purple.shade300, width: 2),
               ),
-              child: StreamBuilder<Object>(
-                stream: Stream.periodic(const Duration(milliseconds: 100)),
+              child: StreamBuilder<int>(
+                stream: Stream.periodic(
+                  const Duration(milliseconds: 100),
+                  (count) => count,
+                ),
                 builder: (context, snapshot) {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +76,7 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
           ),
-          
+
           // Back button
           Positioned(
             top: 20,
@@ -86,10 +89,13 @@ class _GameScreenState extends State<GameScreen> {
               ),
             ),
           ),
-          
+
           // Game state overlays
-          StreamBuilder<Object>(
-            stream: Stream.periodic(const Duration(milliseconds: 100)),
+          StreamBuilder<int>(
+            stream: Stream.periodic(
+              const Duration(milliseconds: 100),
+              (count) => count,
+            ),
             builder: (context, snapshot) {
               if (game.gameState == GameState.gameOver) {
                 return _buildGameOverOverlay();
@@ -107,10 +113,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget _buildHUDItem(String emoji, String text) {
     return Row(
       children: [
-        Text(
-          emoji,
-          style: const TextStyle(fontSize: 20),
-        ),
+        Text(emoji, style: const TextStyle(fontSize: 20)),
         const SizedBox(width: 8),
         Text(
           text,
@@ -186,10 +189,7 @@ class _GameScreenState extends State<GameScreen> {
                         vertical: 15,
                       ),
                     ),
-                    child: const Text(
-                      'MENU',
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    child: const Text('MENU', style: TextStyle(fontSize: 18)),
                   ),
                 ],
               ),
@@ -285,10 +285,7 @@ class _GameScreenState extends State<GameScreen> {
                         vertical: 15,
                       ),
                     ),
-                    child: const Text(
-                      'MENU',
-                      style: TextStyle(fontSize: 18),
-                    ),
+                    child: const Text('MENU', style: TextStyle(fontSize: 18)),
                   ),
                 ],
               ),
