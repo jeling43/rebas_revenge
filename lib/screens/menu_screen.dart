@@ -25,7 +25,7 @@ class MenuScreen extends StatelessWidget {
             children: [
               // Game Title
               Text(
-                "🐕 Reba's Revenge 🐕",
+                "🐕 Reba's Revenge:\nRetriever Ridge Racing 🏁",
                 style: TextStyle(
                   fontSize: 48,
                   fontWeight: FontWeight.bold,
@@ -44,7 +44,7 @@ class MenuScreen extends StatelessWidget {
               
               // Subtitle
               Text(
-                'Save Margo & Millie from Evil Squirrels!',
+                'Race to Save Margo & Millie!',
                 style: TextStyle(
                   fontSize: 20,
                   color: Colors.white.withOpacity(0.9),
@@ -106,11 +106,11 @@ class MenuScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _buildInstruction('🎮', 'Arrow Keys / WASD to move'),
-                    _buildInstruction('⬆️', 'SPACE or UP to jump'),
-                    _buildInstruction('🎾', 'Collect magical tennis balls'),
-                    _buildInstruction('🐕', 'Rescue Margo & Millie'),
-                    _buildInstruction('🐿️', 'Avoid evil squirrels!'),
+                    _buildInstruction('🏎️', 'Arrow Keys / WASD to steer'),
+                    _buildInstruction('⚡', 'SPACE for speed boost'),
+                    _buildInstruction('🎾', 'Collect tennis balls for power-ups'),
+                    _buildInstruction('🏁', 'Finish first to win!'),
+                    _buildInstruction('🐿️', 'Avoid squirrel racers!'),
                   ],
                 ),
               ),

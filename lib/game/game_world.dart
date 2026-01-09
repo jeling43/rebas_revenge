@@ -22,8 +22,16 @@ class RebasRevengeGame extends FlameGame
   GameState gameState = GameState.playing;
   int tennisballsCollected = 0;
   int friendsRescued = 0;
-  final int tennisballsNeeded = 5;
   final int friendsTotal = 2;
+  
+  // Racing-specific properties
+  int currentLap = 1;
+  final int totalLaps = 3;
+  int playerPosition = 1; // 1st, 2nd, 3rd, etc.
+  double raceTime = 0;
+  double boostMeter = 100.0; // Start with full boost
+  List<Enemy> opponents = [];
+  int checkpointsPassed = 0;
   
   final Set<LogicalKeyboardKey> _pressedKeys = {};
 
@@ -34,98 +42,152 @@ class RebasRevengeGame extends FlameGame
   Future<void> onLoad() async {
     await super.onLoad();
     
-    // Add camera
-    camera.viewfinder.anchor = Anchor.topLeft;
+    // Add camera - top-down view
+    camera.viewfinder.anchor = Anchor.center;
     
-    // Create player
-    player = Player(position: Vector2(100, 300));
+    // Create player at starting position
+    player = Player(position: Vector2(size.x / 2, size.y - 150));
     await add(player);
     
-    // Create platforms
-    await _createPlatforms();
+    // Create racing track
+    await _createRacingTrack();
     
-    // Create enemies (squirrels)
-    await _createEnemies();
+    // Create opponents (squirrel racers)
+    await _createOpponents();
     
-    // Create collectibles (tennis balls)
+    // Create collectibles (tennis balls for boosts)
     await _createCollectibles();
     
-    // Create friends (Margo and Millie)
-    await _createFriends();
+    // Create checkpoints for lap counting
+    await _createCheckpoints();
   }
 
-  Future<void> _createPlatforms() async {
-    // Ground platform
+  Future<void> _createRacingTrack() async {
+    // Create oval racing track with platforms as track boundaries
+    // Center of track
+    final centerX = size.x / 2;
+    final centerY = size.y / 2;
+    final trackWidth = 400.0;
+    final trackHeight = 600.0;
+    
+    // Outer track boundary (simplified oval using rectangles)
+    // Top
     await add(PlatformComponent(
-      position: Vector2(0, size.y - 50),
-      size: Vector2(size.x * 3, 50),
+      position: Vector2(centerX - trackWidth / 2, centerY - trackHeight / 2),
+      size: Vector2(trackWidth, 20),
+    ));
+    // Bottom
+    await add(PlatformComponent(
+      position: Vector2(centerX - trackWidth / 2, centerY + trackHeight / 2 - 20),
+      size: Vector2(trackWidth, 20),
+    ));
+    // Left
+    await add(PlatformComponent(
+      position: Vector2(centerX - trackWidth / 2, centerY - trackHeight / 2),
+      size: Vector2(20, trackHeight),
+    ));
+    // Right
+    await add(PlatformComponent(
+      position: Vector2(centerX + trackWidth / 2 - 20, centerY - trackHeight / 2),
+      size: Vector2(20, trackHeight),
     ));
     
-    // Floating platforms
-    final platforms = [
-      Vector2(200, 450),
-      Vector2(400, 350),
-      Vector2(600, 250),
-      Vector2(800, 350),
-      Vector2(1000, 450),
-      Vector2(1200, 350),
-      Vector2(1400, 250),
-      Vector2(1600, 350),
-      Vector2(1800, 450),
-      Vector2(2000, 300),
+    // Inner track boundary (smaller oval)
+    final innerWidth = 200.0;
+    final innerHeight = 400.0;
+    // Top
+    await add(PlatformComponent(
+      position: Vector2(centerX - innerWidth / 2, centerY - innerHeight / 2),
+      size: Vector2(innerWidth, 20),
+    ));
+    // Bottom
+    await add(PlatformComponent(
+      position: Vector2(centerX - innerWidth / 2, centerY + innerHeight / 2 - 20),
+      size: Vector2(innerWidth, 20),
+    ));
+    // Left
+    await add(PlatformComponent(
+      position: Vector2(centerX - innerWidth / 2, centerY - innerHeight / 2),
+      size: Vector2(20, innerHeight),
+    ));
+    // Right
+    await add(PlatformComponent(
+      position: Vector2(centerX + innerWidth / 2 - 20, centerY - innerHeight / 2),
+      size: Vector2(20, innerHeight),
+    ));
+    
+    // Add decorative track elements (fire hydrants, bones, etc.)
+    await _addTrackDecorations(centerX, centerY);
+  }
+  
+  Future<void> _addTrackDecorations(double centerX, double centerY) async {
+    // Add some themed decorations around the track
+    // These will be simple colored markers for now
+    final decorations = [
+      Vector2(centerX - 250, centerY - 350),
+      Vector2(centerX + 250, centerY - 350),
+      Vector2(centerX - 250, centerY + 350),
+      Vector2(centerX + 250, centerY + 350),
     ];
     
-    for (final pos in platforms) {
+    for (final pos in decorations) {
+      // Simple decoration marker (could be enhanced later)
       await add(PlatformComponent(
         position: pos,
-        size: Vector2(150, 20),
+        size: Vector2(30, 30),
       ));
     }
   }
 
-  Future<void> _createEnemies() async {
-    // Place squirrels on various platforms
-    final enemyPositions = [
-      Vector2(450, 320),
-      Vector2(850, 320),
-      Vector2(1250, 320),
-      Vector2(1650, 320),
+  Future<void> _createCheckpoints() async {
+    // Create invisible checkpoints for lap counting
+    final centerX = size.x / 2;
+    final centerY = size.y / 2;
+    
+    // Start/finish line checkpoint
+    await add(Friend(
+      position: Vector2(centerX, centerY + 300),
+      name: 'Checkpoint',
+    ));
+  }
+
+  Future<void> _createOpponents() async {
+    // Create AI-controlled squirrel racers
+    final centerX = size.x / 2;
+    final centerY = size.y / 2;
+    
+    final opponentPositions = [
+      Vector2(centerX - 50, centerY + 250),
+      Vector2(centerX + 50, centerY + 250),
+      Vector2(centerX, centerY + 200),
     ];
     
-    for (final pos in enemyPositions) {
-      await add(Enemy(position: pos));
+    for (final pos in opponentPositions) {
+      final opponent = Enemy(position: pos);
+      await add(opponent);
+      opponents.add(opponent);
     }
   }
 
   Future<void> _createCollectibles() async {
-    // Place tennis balls throughout the level
+    // Place tennis balls around the track for speed boosts
+    final centerX = size.x / 2;
+    final centerY = size.y / 2;
+    
     final collectiblePositions = [
-      Vector2(300, 400),
-      Vector2(500, 300),
-      Vector2(700, 200),
-      Vector2(900, 300),
-      Vector2(1100, 400),
-      Vector2(1300, 300),
-      Vector2(1500, 200),
-      Vector2(1700, 300),
+      Vector2(centerX - 300, centerY),
+      Vector2(centerX + 300, centerY),
+      Vector2(centerX, centerY - 250),
+      Vector2(centerX, centerY + 250),
+      Vector2(centerX - 200, centerY - 150),
+      Vector2(centerX + 200, centerY - 150),
+      Vector2(centerX - 200, centerY + 150),
+      Vector2(centerX + 200, centerY + 150),
     ];
     
     for (final pos in collectiblePositions) {
       await add(Collectible(position: pos));
     }
-  }
-
-  Future<void> _createFriends() async {
-    // Place Margo and Millie at different locations
-    await add(Friend(
-      position: Vector2(1300, 250),
-      name: 'Margo',
-    ));
-    
-    await add(Friend(
-      position: Vector2(2050, 200),
-      name: 'Millie',
-    ));
   }
 
   @override
@@ -136,11 +198,10 @@ class RebasRevengeGame extends FlameGame
     _pressedKeys.clear();
     _pressedKeys.addAll(keysPressed);
     
+    // Boost activation with space bar
     if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.space ||
-          event.logicalKey == LogicalKeyboardKey.arrowUp ||
-          event.logicalKey == LogicalKeyboardKey.keyW) {
-        player.jump();
+      if (event.logicalKey == LogicalKeyboardKey.space) {
+        player.activateBoost();
       }
     }
     
@@ -153,42 +214,108 @@ class RebasRevengeGame extends FlameGame
     
     if (gameState != GameState.playing) return;
     
-    // Handle horizontal movement
-    double horizontalMovement = 0;
+    // Update race time
+    raceTime += dt;
+    
+    // Regenerate boost meter slowly
+    if (boostMeter < 100) {
+      boostMeter = min(100, boostMeter + dt * 10);
+    }
+    
+    // Handle racing controls
+    double forwardMovement = 0;
+    double steeringMovement = 0;
+    
+    if (_pressedKeys.contains(LogicalKeyboardKey.arrowUp) ||
+        _pressedKeys.contains(LogicalKeyboardKey.keyW)) {
+      forwardMovement = 1;
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.arrowDown) ||
+        _pressedKeys.contains(LogicalKeyboardKey.keyS)) {
+      forwardMovement = -1;
+    }
     
     if (_pressedKeys.contains(LogicalKeyboardKey.arrowLeft) ||
         _pressedKeys.contains(LogicalKeyboardKey.keyA)) {
-      horizontalMovement = -1;
+      steeringMovement = -1;
     } else if (_pressedKeys.contains(LogicalKeyboardKey.arrowRight) ||
         _pressedKeys.contains(LogicalKeyboardKey.keyD)) {
-      horizontalMovement = 1;
+      steeringMovement = 1;
     }
     
-    player.horizontalMovement = horizontalMovement;
+    player.forwardMovement = forwardMovement;
+    player.steeringMovement = steeringMovement;
     
     // Camera follows player
-    final playerX = player.position.x;
-    final cameraX = camera.viewfinder.position.x;
-    final screenWidth = size.x;
+    camera.viewfinder.position = player.position;
     
-    // Keep player in center-ish of screen
-    if (playerX > screenWidth / 2) {
-      camera.viewfinder.position.x = playerX - screenWidth / 2;
+    // Update opponent positions (simple AI)
+    _updateOpponents(dt);
+    
+    // Calculate player position
+    _calculateRacePosition();
+  }
+  
+  void _updateOpponents(double dt) {
+    // Simple AI: opponents move around the track
+    for (final opponent in opponents) {
+      // Move opponents in a circular pattern around the track
+      final centerX = size.x / 2;
+      final centerY = size.y / 2;
+      final angle = opponent.aiAngle;
+      final radius = 250.0;
+      
+      opponent.aiAngle += dt * 0.5; // Adjust speed
+      opponent.position.x = centerX + cos(angle) * radius;
+      opponent.position.y = centerY + sin(angle) * radius;
+    }
+  }
+  
+  void _calculateRacePosition() {
+    // Simple position calculation based on progress
+    // In a full implementation, this would be based on track progress
+    playerPosition = 1; // Default to 1st place for now
+    
+    // Count how many opponents are ahead
+    for (final opponent in opponents) {
+      final opponentProgress = opponent.aiAngle;
+      final playerProgress = currentLap * 2 * pi + atan2(
+        player.position.y - size.y / 2,
+        player.position.x - size.x / 2,
+      );
+      
+      if (opponentProgress > playerProgress) {
+        playerPosition++;
+      }
     }
   }
 
   void collectTennisball() {
     tennisballsCollected++;
-    checkVictory();
+    // Tennis balls now give boost energy instead of counting toward victory
+    boostMeter = min(100, boostMeter + 25);
   }
 
   void rescueFriend() {
     friendsRescued++;
-    checkVictory();
+  }
+  
+  void passCheckpoint() {
+    checkpointsPassed++;
+    
+    // Every checkpoint passed = lap completed
+    if (checkpointsPassed > 0 && checkpointsPassed % 1 == 0) {
+      currentLap = min(totalLaps + 1, checkpointsPassed + 1);
+      
+      // Check victory condition
+      if (currentLap > totalLaps && playerPosition == 1) {
+        gameState = GameState.victory;
+      }
+    }
   }
 
   void checkVictory() {
-    if (friendsRescued >= friendsTotal && tennisballsCollected >= tennisballsNeeded) {
+    // Victory now based on completing laps in 1st place
+    if (currentLap > totalLaps && playerPosition == 1) {
       gameState = GameState.victory;
     }
   }
@@ -201,18 +328,25 @@ class RebasRevengeGame extends FlameGame
     gameState = GameState.playing;
     tennisballsCollected = 0;
     friendsRescued = 0;
+    currentLap = 1;
+    raceTime = 0;
+    boostMeter = 100.0;
+    checkpointsPassed = 0;
     
     // Reset player position
-    player.position = Vector2(100, 300);
+    player.position = Vector2(size.x / 2, size.y - 150);
     player.velocity = Vector2.zero();
+    player.rotation = 0;
     
     // Reset camera
-    camera.viewfinder.position = Vector2.zero();
+    camera.viewfinder.position = player.position;
     
     // Remove and recreate all game objects
-    for (final enemy in children.whereType<Enemy>()) {
-      enemy.removeFromParent();
+    for (final opponent in opponents) {
+      opponent.removeFromParent();
     }
+    opponents.clear();
+    
     for (final collectible in children.whereType<Collectible>()) {
       collectible.removeFromParent();
     }
@@ -220,8 +354,27 @@ class RebasRevengeGame extends FlameGame
       friend.removeFromParent();
     }
     
-    _createEnemies();
+    _createOpponents();
     _createCollectibles();
-    _createFriends();
+    _createCheckpoints();
+  }
+  
+  String getPositionString() {
+    switch (playerPosition) {
+      case 1:
+        return '1st';
+      case 2:
+        return '2nd';
+      case 3:
+        return '3rd';
+      default:
+        return '${playerPosition}th';
+    }
+  }
+  
+  String getRaceTimeString() {
+    final minutes = (raceTime ~/ 60).toString().padLeft(1, '0');
+    final seconds = (raceTime % 60).toStringAsFixed(1).padLeft(4, '0');
+    return '$minutes:$seconds';
   }
 }

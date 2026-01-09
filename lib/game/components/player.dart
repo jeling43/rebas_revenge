@@ -17,14 +17,19 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
         );
 
   Vector2 velocity = Vector2.zero();
-  double horizontalMovement = 0;
-  bool isOnGround = false;
+  double forwardMovement = 0;
+  double steeringMovement = 0;
   double animationTime = 0;
+  double currentSpeed = 0;
+  bool isBoosting = false;
+  double boostTime = 0;
   
-  final double moveSpeed = 200;
-  final double jumpSpeed = -500;
-  final double gravity = 1000;
-  final double maxFallSpeed = 500;
+  final double maxSpeed = 250;
+  final double acceleration = 200;
+  final double deceleration = 150;
+  final double turnSpeed = 3.0;
+  final double boostMultiplier = 1.5;
+  final double boostDuration = 2.0;
 
   @override
   Future<void> onLoad() async {
@@ -39,52 +44,72 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
     // Update animation time
     animationTime += dt;
     
-    // Apply gravity
-    velocity.y += gravity * dt;
-    if (velocity.y > maxFallSpeed) {
-      velocity.y = maxFallSpeed;
+    // Handle boost timer
+    if (isBoosting) {
+      boostTime -= dt;
+      if (boostTime <= 0) {
+        isBoosting = false;
+      }
     }
     
-    // Apply horizontal movement
-    velocity.x = horizontalMovement * moveSpeed;
+    // Calculate speed based on forward movement
+    if (forwardMovement > 0) {
+      currentSpeed = math.min(maxSpeed * (isBoosting ? boostMultiplier : 1.0), 
+                        currentSpeed + acceleration * dt);
+    } else if (forwardMovement < 0) {
+      currentSpeed = math.max(-maxSpeed / 2, currentSpeed - acceleration * dt);
+    } else {
+      // Decelerate when not pressing forward/back
+      if (currentSpeed > 0) {
+        currentSpeed = math.max(0, currentSpeed - deceleration * dt);
+      } else if (currentSpeed < 0) {
+        currentSpeed = math.min(0, currentSpeed + deceleration * dt);
+      }
+    }
+    
+    // Apply steering (rotation)
+    if (steeringMovement != 0 && currentSpeed.abs() > 10) {
+      angle += steeringMovement * turnSpeed * dt;
+    }
+    
+    // Calculate velocity based on rotation and speed
+    velocity.x = math.cos(angle) * currentSpeed;
+    velocity.y = math.sin(angle) * currentSpeed;
     
     // Update position
     position += velocity * dt;
     
-    // Keep player within game bounds horizontally
-    if (position.x < 20) {
-      position.x = 20;
-    }
-    
-    // Reset on-ground status
-    isOnGround = false;
+    // Keep player within reasonable game bounds
+    position.x = position.x.clamp(50, gameRef.size.x - 50);
+    position.y = position.y.clamp(50, gameRef.size.y - 50);
   }
 
   @override
   void render(Canvas canvas) {
     super.render(canvas);
     
-    // Draw golden retriever (Reba) as a simple shape
-    final paint = Paint()
+    // Draw Reba's kart (simplified top-down view)
+    
+    // Kart body
+    final kartPaint = Paint()
       ..color = Colors.amber.shade600
       ..style = PaintingStyle.fill;
     
-    // Body
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(-size.x / 2, -size.y / 2, size.x, size.y),
-        const Radius.circular(8),
+        const Radius.circular(10),
       ),
-      paint,
+      kartPaint,
     );
     
-    // Head (slightly lighter)
+    // Driver (Reba's head)
     final headPaint = Paint()
       ..color = Colors.amber.shade400
       ..style = PaintingStyle.fill;
     
     canvas.drawCircle(
-      Offset(-size.x / 4, -size.y / 2.5),
+      Offset(0, 0),
       size.x / 3,
       headPaint,
     );
@@ -94,32 +119,49 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
       ..color = Colors.brown.shade900
       ..style = PaintingStyle.fill;
     
-    canvas.drawCircle(Offset(-size.x / 3, -size.y / 2.8), 3, eyePaint);
-    canvas.drawCircle(Offset(-size.x / 6, -size.y / 2.8), 3, eyePaint);
+    canvas.drawCircle(Offset(-5, -3), 3, eyePaint);
+    canvas.drawCircle(Offset(5, -3), 3, eyePaint);
     
-    // Nose
-    canvas.drawCircle(Offset(-size.x / 4, -size.y / 2.2), 4, eyePaint);
-    
-    // Tail
-    final tailPaint = Paint()
-      ..color = Colors.amber.shade500
+    // Racing stripe
+    final stripePaint = Paint()
+      ..color = Colors.white
       ..style = PaintingStyle.fill;
     
-    canvas.drawCircle(Offset(size.x / 2, 0), 8, tailPaint);
+    canvas.drawRect(
+      Rect.fromLTWH(-3, -size.y / 2, 6, size.y),
+      stripePaint,
+    );
     
-    // Sparkle effect (magical) - use game time instead of DateTime.now()
-    if ((animationTime * 2).floor() % 2 == 0) {
-      final sparklePaint = Paint()
+    // Boost effect
+    if (isBoosting) {
+      final boostPaint = Paint()
         ..color = Colors.yellow.withOpacity(0.6)
         ..style = PaintingStyle.fill;
-      canvas.drawCircle(Offset(size.x / 3, -size.y / 3), 3, sparklePaint);
+      
+      for (int i = 0; i < 3; i++) {
+        canvas.drawCircle(
+          Offset(-size.x / 2 - 10 - i * 8, 0),
+          5 - i * 1.5,
+          boostPaint,
+        );
+      }
+    }
+    
+    // Speed sparkle effect
+    if ((animationTime * 3).floor() % 2 == 0 && currentSpeed > 100) {
+      final sparklePaint = Paint()
+        ..color = Colors.lightBlue.withOpacity(0.6)
+        ..style = PaintingStyle.fill;
+      canvas.drawCircle(Offset(size.x / 3, size.y / 3), 3, sparklePaint);
     }
   }
-
-  void jump() {
-    if (isOnGround && gameRef.gameState == GameState.playing) {
-      velocity.y = jumpSpeed;
-      isOnGround = false;
+  
+  void activateBoost() {
+    if (gameRef.gameState == GameState.playing && 
+        gameRef.boostMeter >= 30 && !isBoosting) {
+      isBoosting = true;
+      boostTime = boostDuration;
+      gameRef.boostMeter -= 30;
     }
   }
 
@@ -128,20 +170,15 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
     super.onCollision(intersectionPoints, other);
     
     if (other is PlatformComponent) {
-      // Check if player is falling onto the platform
-      if (velocity.y > 0) {
-        final playerBottom = position.y + size.y / 2;
-        final platformTop = other.position.y;
-        
-        if (playerBottom <= platformTop + 10) {
-          position.y = platformTop - size.y / 2;
-          velocity.y = 0;
-          isOnGround = true;
-        }
-      }
+      // Bounce off track boundaries
+      velocity = velocity * -0.5;
+      currentSpeed *= 0.5;
     } else if (other is Enemy) {
+      // Collision with opponent - slow down
+      currentSpeed *= 0.7;
       if (gameRef.gameState == GameState.playing) {
-        gameRef.gameOver();
+        // Don't game over, just slow down in racing
+        // gameRef.gameOver();
       }
     } else if (other is Collectible) {
       if (!other.isCollected) {
@@ -151,7 +188,7 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
     } else if (other is Friend) {
       if (!other.isRescued) {
         other.rescue();
-        gameRef.rescueFriend();
+        gameRef.passCheckpoint();
       }
     }
   }
