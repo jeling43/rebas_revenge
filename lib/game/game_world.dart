@@ -272,18 +272,23 @@ class RebasRevengeGame extends FlameGame
   
   void _calculateRacePosition() {
     // Simple position calculation based on progress
-    // In a full implementation, this would be based on track progress
-    playerPosition = 1; // Default to 1st place for now
+    // For a more accurate implementation, track progress around the actual racing path
+    playerPosition = 1; // Default to 1st place
     
-    // Count how many opponents are ahead
+    // Count how many opponents are ahead based on their lap progress
+    // Since opponents move in a circle and we track their angle,
+    // we can estimate progress. For the player, we use distance from start.
+    final startX = size.x / 2;
+    final startY = size.y - 150;
+    final playerDistanceFromStart = (player.position - Vector2(startX, startY)).length;
+    final playerTotalProgress = (currentLap - 1) * 1000 + playerDistanceFromStart;
+    
     for (final opponent in opponents) {
-      final opponentProgress = opponent.aiAngle;
-      final playerProgress = currentLap * 2 * pi + atan2(
-        player.position.y - size.y / 2,
-        player.position.x - size.x / 2,
-      );
+      // Estimate opponent progress based on their circular movement
+      final opponentLap = (opponent.aiAngle / (2 * pi)).floor() + 1;
+      final opponentTotalProgress = (opponentLap - 1) * 1000 + (opponent.aiAngle % (2 * pi)) * 159; // 159 ≈ 1000/(2*pi)
       
-      if (opponentProgress > playerProgress) {
+      if (opponentTotalProgress > playerTotalProgress) {
         playerPosition++;
       }
     }
@@ -302,11 +307,11 @@ class RebasRevengeGame extends FlameGame
   void passCheckpoint() {
     checkpointsPassed++;
     
-    // Every checkpoint passed = lap completed
-    if (checkpointsPassed > 0 && checkpointsPassed % 1 == 0) {
-      currentLap = min(totalLaps + 1, checkpointsPassed + 1);
+    // Complete a lap when passing the checkpoint
+    if (checkpointsPassed > 0) {
+      currentLap = checkpointsPassed + 1;
       
-      // Check victory condition
+      // Check victory condition - must complete all laps and be in 1st place
       if (currentLap > totalLaps && playerPosition == 1) {
         gameState = GameState.victory;
       }
@@ -373,8 +378,9 @@ class RebasRevengeGame extends FlameGame
   }
   
   String getRaceTimeString() {
-    final minutes = (raceTime ~/ 60).toString().padLeft(1, '0');
-    final seconds = (raceTime % 60).toStringAsFixed(1).padLeft(4, '0');
-    return '$minutes:$seconds';
+    final minutes = (raceTime ~/ 60).toString().padLeft(2, '0');
+    final seconds = (raceTime % 60).toStringAsFixed(1);
+    final secondsStr = seconds.length < 4 ? seconds.padLeft(4, '0') : seconds;
+    return '$minutes:$secondsStr';
   }
 }

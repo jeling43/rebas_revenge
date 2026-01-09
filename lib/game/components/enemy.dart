@@ -16,6 +16,7 @@ class Enemy extends PositionComponent with CollisionCallbacks {
   final double moveRange = 100;
   late double startX;
   double aiAngle = 0; // For racing AI
+  double animationTime = 0; // For consistent animation timing
 
   @override
   Future<void> onLoad() async {
@@ -29,6 +30,9 @@ class Enemy extends PositionComponent with CollisionCallbacks {
   @override
   void update(double dt) {
     super.update(dt);
+    
+    // Update animation time
+    animationTime += dt;
     
     // Racing opponents don't need local movement
     // Movement is handled by game_world AI
@@ -91,12 +95,11 @@ class Enemy extends PositionComponent with CollisionCallbacks {
     );
     
     // Evil sparkles
-    final time = DateTime.now().millisecondsSinceEpoch / 300;
     final sparklePaint = Paint()
       ..color = Colors.red.shade200.withOpacity(0.8)
       ..style = PaintingStyle.fill;
     
-    if ((time % 2).floor() == 0) {
+    if ((animationTime * 3).floor() % 2 == 0) {
       canvas.drawCircle(Offset(size.x / 4, -size.y / 3), 2, sparklePaint);
     }
   }

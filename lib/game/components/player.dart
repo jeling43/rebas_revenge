@@ -170,16 +170,11 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
     super.onCollision(intersectionPoints, other);
     
     if (other is PlatformComponent) {
-      // Bounce off track boundaries
-      velocity = velocity * -0.5;
-      currentSpeed *= 0.5;
+      // Bounce off track boundaries - reduce speed significantly
+      currentSpeed *= 0.3;
     } else if (other is Enemy) {
       // Collision with opponent - slow down
       currentSpeed *= 0.7;
-      if (gameRef.gameState == GameState.playing) {
-        // Don't game over, just slow down in racing
-        // gameRef.gameOver();
-      }
     } else if (other is Collectible) {
       if (!other.isCollected) {
         other.collect();
