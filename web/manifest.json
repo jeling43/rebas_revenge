@@ -1,12 +1,12 @@
 {
-    "name": "rebas_revenge",
-    "short_name": "rebas_revenge",
+    "name": "Reba's Revenge",
+    "short_name": "Reba's Revenge",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
-    "orientation": "portrait-primary",
+    "background_color": "#1a0033",
+    "theme_color": "#7C3AED",
+    "description": "A magical world platformer game featuring Reba the golden retriever",
+    "orientation": "landscape-primary",
     "prefer_related_applications": false,
     "icons": [
         {
