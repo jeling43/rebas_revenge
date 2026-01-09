@@ -346,7 +346,7 @@ class RebasRevengeGame extends FlameGame
     // Reset player position
     player.position = Vector2(size.x / 2, size.y - 150);
     player.velocity = Vector2.zero();
-    player.rotation = 0;
+    player.angle = 0;
     
     // Reset camera
     camera.viewfinder.position = player.position;
