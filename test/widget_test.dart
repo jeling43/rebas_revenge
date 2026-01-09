@@ -11,20 +11,29 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:rebas_revenge/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Menu screen loads with title', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const RebasRevengeApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that the menu screen title is present.
+    expect(find.text("🐕 Reba's Revenge 🐕"), findsOneWidget);
+    
+    // Verify that the start button is present.
+    expect(find.text('START GAME'), findsOneWidget);
+    
+    // Verify that instructions are present.
+    expect(find.text('HOW TO PLAY'), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('Can navigate to game screen', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const RebasRevengeApp());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Find and tap the start button.
+    await tester.tap(find.text('START GAME'));
+    await tester.pumpAndSettle();
+
+    // Verify we've navigated away from menu by checking title is gone.
+    expect(find.text("🐕 Reba's Revenge 🐕"), findsNothing);
   });
 }
