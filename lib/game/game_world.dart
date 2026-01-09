@@ -283,10 +283,13 @@ class RebasRevengeGame extends FlameGame
     final playerDistanceFromStart = (player.position - Vector2(startX, startY)).length;
     final playerTotalProgress = (currentLap - 1) * 1000 + playerDistanceFromStart;
     
+    // Conversion factor from radians to linear progress (approximate track length / 2π)
+    const trackProgressPerRadian = 1000 / (2 * pi);
+    
     for (final opponent in opponents) {
       // Estimate opponent progress based on their circular movement
       final opponentLap = (opponent.aiAngle / (2 * pi)).floor() + 1;
-      final opponentTotalProgress = (opponentLap - 1) * 1000 + (opponent.aiAngle % (2 * pi)) * 159; // 159 ≈ 1000/(2*pi)
+      final opponentTotalProgress = (opponentLap - 1) * 1000 + (opponent.aiAngle % (2 * pi)) * trackProgressPerRadian;
       
       if (opponentTotalProgress > playerTotalProgress) {
         playerPosition++;
@@ -307,9 +310,11 @@ class RebasRevengeGame extends FlameGame
   void passCheckpoint() {
     checkpointsPassed++;
     
-    // Complete a lap when passing the checkpoint
-    if (checkpointsPassed > 0) {
-      currentLap = checkpointsPassed + 1;
+    // Update lap count based on checkpoint passes
+    // First checkpoint doesn't change lap, subsequent ones do
+    final newLap = (checkpointsPassed ~/ 1) + 1; // One checkpoint per lap
+    if (newLap > currentLap && currentLap <= totalLaps) {
+      currentLap = newLap;
       
       // Check victory condition - must complete all laps and be in 1st place
       if (currentLap > totalLaps && playerPosition == 1) {
@@ -379,8 +384,10 @@ class RebasRevengeGame extends FlameGame
   
   String getRaceTimeString() {
     final minutes = (raceTime ~/ 60).toString().padLeft(2, '0');
-    final seconds = (raceTime % 60).toStringAsFixed(1);
-    final secondsStr = seconds.length < 4 ? seconds.padLeft(4, '0') : seconds;
+    final seconds = (raceTime % 60);
+    final secondsInt = seconds.toInt();
+    final secondsDecimal = ((seconds - secondsInt) * 10).toInt();
+    final secondsStr = '${secondsInt.toString().padLeft(2, '0')}.$secondsDecimal';
     return '$minutes:$secondsStr';
   }
 }

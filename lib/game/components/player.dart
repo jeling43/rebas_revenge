@@ -30,6 +30,10 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
   final double turnSpeed = 3.0;
   final double boostMultiplier = 1.5;
   final double boostDuration = 2.0;
+  
+  // Boundary constraints to keep player within reasonable game area
+  static const double minBoundaryMargin = 50.0;
+  static const double maxBoundaryMargin = 50.0;
 
   @override
   Future<void> onLoad() async {
@@ -80,8 +84,8 @@ class Player extends PositionComponent with CollisionCallbacks, HasGameRef<Rebas
     position += velocity * dt;
     
     // Keep player within reasonable game bounds
-    position.x = position.x.clamp(50, gameRef.size.x - 50);
-    position.y = position.y.clamp(50, gameRef.size.y - 50);
+    position.x = position.x.clamp(minBoundaryMargin, gameRef.size.x - maxBoundaryMargin);
+    position.y = position.y.clamp(minBoundaryMargin, gameRef.size.y - maxBoundaryMargin);
   }
 
   @override
